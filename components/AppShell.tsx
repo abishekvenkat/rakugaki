@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Sidebar from "./Sidebar";
 import TabBar from "./TabBar";
 import CommandPalette from "./CommandPalette";
+import SettingsPanel from "./SettingsPanel";
 import CodeMirrorEditor from "./Editor/CodeMirrorEditor";
 import MarkdownPreview from "./Editor/MarkdownPreview";
 import SplitView from "./Editor/SplitView";
@@ -34,6 +35,7 @@ export default function AppShell() {
   const [viewMode, setViewMode] = useState<ViewMode>("edit");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const [setupDone, setSetupDone] = useState(false);
   const autosaveTimer = useRef<NodeJS.Timeout | null>(null);
@@ -51,7 +53,7 @@ export default function AppShell() {
       if (!alreadyAsked) {
         const ask = async () => {
           const ok = confirm(
-            "Welcome to Rakugaki!\n\nWould you like to pick a folder for auto-saving recovery copies of your notes? You can skip and do this later."
+            "Welcome to Rakugaki!\n\nWould you like to pick a folder for auto-saving recovery copies of your notes? You can skip and do this later in Settings."
           );
           if (ok) await pickTempDir();
           localStorage.setItem("rakugaki:setup-done", "1");
@@ -139,6 +141,7 @@ export default function AppShell() {
       if (cmd && e.key === "w") { e.preventDefault(); closeTab(activeTabId); }
       if (cmd && e.key === "k") { e.preventDefault(); setCommandPaletteOpen(true); }
       if (cmd && e.key === "\\") { e.preventDefault(); setSidebarOpen((v) => !v); }
+      if (cmd && e.key === ",") { e.preventDefault(); setSettingsOpen(true); }
       if (cmd && e.shiftKey && e.key === "E") {
         e.preventDefault();
         setViewMode((v) => v === "edit" ? "preview" : "edit");
@@ -156,13 +159,15 @@ export default function AppShell() {
     applySettings(next);
   }, []);
 
-  // ─── Export menu ──────────────────────────────────────────────────────────
+  // ─── Export ───────────────────────────────────────────────────────────────
 
   const handleExport = useCallback(async (format: "md" | "txt" | "rtf") => {
     if (!activeTab) return;
     const baseName = activeTab.title.replace(/\.[^.]+$/, "");
     await exportAs(activeTab.content, baseName, format);
   }, [activeTab]);
+
+  const isVertical = settings.tabLayout === "vertical";
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
@@ -171,9 +176,9 @@ export default function AppShell() {
       className="flex h-screen overflow-hidden"
       style={{ background: "var(--macos-bg)" }}
     >
-      {/* Sidebar */}
+      {/* Sidebar — always rendered; in vertical mode it shows tabs prominently */}
       <Sidebar
-        isOpen={sidebarOpen}
+        isOpen={sidebarOpen || isVertical}
         onToggle={() => setSidebarOpen((v) => !v)}
         tabs={tabs}
         activeTabId={activeTabId}
@@ -188,51 +193,97 @@ export default function AppShell() {
         onOpenRecovery={openTempDir}
         onPickTempDir={pickTempDir}
         hasTempDir={hasTempDir()}
+        isVerticalTabs={isVertical}
       />
 
-      {/* Main content area */}
+      {/* Main content area — shift right when sidebar is pinned open */}
       <div
-        className="flex flex-1 flex-col overflow-hidden"
+        className="flex flex-1 flex-col overflow-hidden transition-all"
         style={{
-          paddingTop: "28px", // macOS traffic lights clearance (height)
-          paddingLeft: sidebarOpen ? "0" : "0",
+          paddingTop: "28px",
+          marginLeft: isVertical ? "240px" : "0",
         }}
       >
-        {/* Tab bar — padded left for traffic lights */}
-        <TabBar
-          tabs={tabs}
-          activeTabId={activeTabId}
-          onSelectTab={setActiveTabId}
-          onCloseTab={closeTab}
-          onAddTab={() => addTab()}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          onSave={handleSave}
-          isDirty={activeTab?.isDirty ?? false}
-          settings={settings}
-          onUpdateSettings={updateSettings}
-        />
+        {/* Tab bar — hidden in vertical mode */}
+        {!isVertical && (
+          <TabBar
+            tabs={tabs}
+            activeTabId={activeTabId}
+            onSelectTab={setActiveTabId}
+            onCloseTab={closeTab}
+            onAddTab={() => addTab()}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            onSave={handleSave}
+            isDirty={activeTab?.isDirty ?? false}
+            onSettingsClick={() => setSettingsOpen(true)}
+          />
+        )}
+
+        {/* Vertical mode top bar */}
+        {isVertical && (
+          <div
+            className="flex items-center justify-between border-b px-4"
+            style={{
+              height: "36px",
+              borderColor: "var(--macos-border)",
+              background: "var(--macos-surface)",
+              backdropFilter: "blur(20px)",
+              WebkitAppRegion: "drag",
+            } as React.CSSProperties}
+          >
+            <span className="truncate text-sm font-medium" style={{ color: "var(--macos-text)", WebkitAppRegion: "no-drag" } as React.CSSProperties}>
+              {activeTab?.title ?? "Untitled"}
+              {activeTab?.isDirty && (
+                <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full align-middle" style={{ background: "var(--macos-accent)" }} />
+              )}
+            </span>
+            <div className="flex items-center gap-2" style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}>
+              {activeTab?.isDirty && (
+                <button
+                  onClick={handleSave}
+                  className="rounded-full px-2.5 py-0.5 text-xs font-medium"
+                  style={{ background: "var(--macos-accent)", color: "#fff" }}
+                >
+                  Save
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  const modes: ViewMode[] = ["edit", "split", "preview"];
+                  const idx = modes.indexOf(viewMode);
+                  setViewMode(modes[(idx + 1) % modes.length]);
+                }}
+                className="flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium"
+                style={{ background: "var(--macos-border)", color: "var(--macos-text)" }}
+              >
+                {viewMode === "edit" ? "✏️ Edit" : viewMode === "split" ? "⇔ Split" : "👁 Preview"}
+              </button>
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="flex h-7 w-7 items-center justify-center rounded-lg"
+                style={{ background: "var(--macos-border)", color: "var(--macos-text-secondary)" }}
+              >
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Editor area */}
         <div className="flex-1 overflow-hidden">
           {activeTab && (
             <>
               {viewMode === "edit" && (
-                <CodeMirrorEditor
-                  content={activeTab.content}
-                  onChange={updateContent}
-                  settings={settings}
-                />
+                <CodeMirrorEditor content={activeTab.content} onChange={updateContent} settings={settings} />
               )}
               {viewMode === "preview" && (
                 <MarkdownPreview content={activeTab.content} settings={settings} />
               )}
               {viewMode === "split" && (
-                <SplitView
-                  content={activeTab.content}
-                  onChange={updateContent}
-                  settings={settings}
-                />
+                <SplitView content={activeTab.content} onChange={updateContent} settings={settings} />
               )}
             </>
           )}
@@ -252,6 +303,15 @@ export default function AppShell() {
           }}
           onSetViewMode={(mode) => { setViewMode(mode); setCommandPaletteOpen(false); }}
           onExport={(fmt) => { handleExport(fmt); setCommandPaletteOpen(false); }}
+        />
+      )}
+
+      {/* Settings Panel */}
+      {settingsOpen && (
+        <SettingsPanel
+          settings={settings}
+          onUpdate={updateSettings}
+          onClose={() => setSettingsOpen(false)}
         />
       )}
     </div>

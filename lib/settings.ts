@@ -1,17 +1,20 @@
 export type Theme = "light" | "dark" | "system";
 export type Font = "sans" | "mono" | "serif";
 export type FontSize = "xs" | "s" | "m" | "l" | "xl";
+export type TabLayout = "horizontal" | "vertical";
 
 export interface Settings {
   theme: Theme;
   font: Font;
   fontSize: FontSize;
+  tabLayout: TabLayout;
 }
 
 const DEFAULTS: Settings = {
   theme: "system",
   font: "sans",
   fontSize: "m",
+  tabLayout: "horizontal",
 };
 
 export function loadSettings(): Settings {
@@ -34,13 +37,11 @@ export function saveSettings(settings: Partial<Settings>): Settings {
 export function applySettings(settings: Settings) {
   const root = document.documentElement;
 
-  // Theme
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const isDark =
     settings.theme === "dark" || (settings.theme === "system" && prefersDark);
   root.classList.toggle("dark", isDark);
 
-  // Font and font-size as data attributes (CSS picks them up)
   root.setAttribute("data-font", settings.font);
   root.setAttribute("data-font-size", settings.fontSize);
 }

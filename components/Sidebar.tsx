@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import type { Tab, ViewMode } from "./AppShell";
+import type { Tab } from "./AppShell";
 import type { Settings } from "@/lib/settings";
 
 interface SidebarProps {
@@ -20,19 +20,20 @@ interface SidebarProps {
   onOpenRecovery: () => void;
   onPickTempDir: () => void;
   hasTempDir: boolean;
+  isVerticalTabs: boolean;
 }
 
 export default function Sidebar({
   isOpen, onToggle, tabs, activeTabId, onSelectTab,
   onAddTab, onCloseTab, settings, onUpdateSettings,
   onOpenFile, onSaveFile, onExport, onOpenRecovery, onPickTempDir, hasTempDir,
+  isVerticalTabs,
 }: SidebarProps) {
   const [hovered, setHovered] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const hoverTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const visible = isOpen || hovered;
+  const visible = isVerticalTabs || isOpen || hovered;
 
   const handleMouseEnter = useCallback(() => {
     if (hoverTimer.current) clearTimeout(hoverTimer.current);
@@ -160,66 +161,6 @@ export default function Sidebar({
           ))}
         </div>
 
-        <hr style={{ borderColor: "var(--macos-border)", margin: "4px 12px" }} />
-
-        {/* Settings */}
-        <div className="px-2 pb-4">
-          <SidebarButton
-            icon="⚙️"
-            label="Settings"
-            onClick={() => setShowSettings((v) => !v)}
-          />
-          {showSettings && (
-            <div className="px-2 pt-1 space-y-3">
-              {/* Theme */}
-              <SettingRow label="Theme">
-                <select
-                  value={settings.theme}
-                  onChange={(e) => onUpdateSettings({ theme: e.target.value as Settings["theme"] })}
-                  className="rounded px-2 py-0.5 text-xs"
-                  style={{ background: "var(--macos-surface)", color: "var(--macos-text)", border: "1px solid var(--macos-border)" }}
-                >
-                  <option value="system">System</option>
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                </select>
-              </SettingRow>
-
-              {/* Font */}
-              <SettingRow label="Font">
-                <select
-                  value={settings.font}
-                  onChange={(e) => onUpdateSettings({ font: e.target.value as Settings["font"] })}
-                  className="rounded px-2 py-0.5 text-xs"
-                  style={{ background: "var(--macos-surface)", color: "var(--macos-text)", border: "1px solid var(--macos-border)" }}
-                >
-                  <option value="sans">Sans-Serif</option>
-                  <option value="mono">Monospace</option>
-                  <option value="serif">Serif</option>
-                </select>
-              </SettingRow>
-
-              {/* Font size */}
-              <SettingRow label="Size">
-                <div className="flex gap-1">
-                  {(["xs", "s", "m", "l", "xl"] as Settings["fontSize"][]).map((sz) => (
-                    <button
-                      key={sz}
-                      onClick={() => onUpdateSettings({ fontSize: sz })}
-                      className="rounded px-1.5 py-0.5 text-xs uppercase"
-                      style={{
-                        background: settings.fontSize === sz ? "var(--macos-accent)" : "var(--macos-border)",
-                        color: settings.fontSize === sz ? "#fff" : "var(--macos-text)",
-                      }}
-                    >
-                      {sz}
-                    </button>
-                  ))}
-                </div>
-              </SettingRow>
-            </div>
-          )}
-        </div>
       </div>
     </>
   );
@@ -235,14 +176,5 @@ function SidebarButton({ icon, label, onClick }: { icon: string; label: string; 
       <span className="w-4 text-center text-xs">{icon}</span>
       <span className="truncate">{label}</span>
     </button>
-  );
-}
-
-function SettingRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-xs" style={{ color: "var(--macos-text-secondary)" }}>{label}</span>
-      {children}
-    </div>
   );
 }
