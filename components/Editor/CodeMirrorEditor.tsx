@@ -57,7 +57,9 @@ export default function CodeMirrorEditor({ content, onChange, settings }: CodeMi
       extensions: [
         history(),
         markdown({ base: markdownLanguage, codeLanguages: languages }),
-        syntaxHighlighting(defaultHighlightStyle),
+        // oneDark includes its own syntax highlighting; adding defaultHighlightStyle
+        // on top overrides it with light-mode colors, making dark mode unreadable
+        ...(!isDark ? [syntaxHighlighting(defaultHighlightStyle)] : []),
         buildTheme(isDark),
         search({ top: true }),
         keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),

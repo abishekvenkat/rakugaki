@@ -76,10 +76,18 @@ export default function Sidebar({
         {/* App title */}
         <div className="px-4 pb-3">
           <div className="flex items-center gap-2">
-            <picture>
-              <source srcSet="/icons/rakugaki-dark.svg" media="(prefers-color-scheme: dark)" />
-              <img src="/icons/rakugaki-light.svg" alt="" className="h-5 w-5" />
-            </picture>
+            {(() => {
+              const isDark = settings.theme === "dark" ||
+                (settings.theme === "system" && typeof window !== "undefined" &&
+                  window.matchMedia("(prefers-color-scheme: dark)").matches);
+              return (
+                <img
+                  src={isDark ? "/icons/rakugaki-light.svg" : "/icons/rakugaki-dark.svg"}
+                  alt=""
+                  className="h-5 w-5"
+                />
+              );
+            })()}
             <span className="text-sm font-semibold" style={{ color: "var(--macos-text)" }}>
               Rakugaki
             </span>
