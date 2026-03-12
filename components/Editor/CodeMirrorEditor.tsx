@@ -4,7 +4,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
-import { search, searchKeymap } from "@codemirror/search";
+import { search, searchKeymap, openSearchPanel } from "@codemirror/search";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
 import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
@@ -76,6 +76,20 @@ export default function CodeMirrorEditor({ content, onChange, settings }: CodeMi
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDark]); // Recreate when theme switches
+
+  // Override browser Cmd+F / Cmd+H to use CodeMirror search panel
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const cmd = e.metaKey || e.ctrlKey;
+      if (!cmd || e.shiftKey || e.altKey) return;
+      if (e.key === "f" || e.key === "h") {
+        e.preventDefault();
+        if (viewRef.current) openSearchPanel(viewRef.current);
+      }
+    };
+    window.addEventListener("keydown", handler, true); // capture phase beats browser default
+    return () => window.removeEventListener("keydown", handler, true);
+  }, []);
 
   // Sync external content changes (e.g., file open)
   useEffect(() => {

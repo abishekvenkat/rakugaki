@@ -382,15 +382,15 @@ export default function AppShell() {
           onZenMode={() => { setZenMode(true); setCommandPaletteOpen(false); }}
           onFind={() => {
             setCommandPaletteOpen(false);
-            setTimeout(() => {
-              window.dispatchEvent(new KeyboardEvent("keydown", { key: "f", metaKey: true, bubbles: true }));
-            }, 50);
+            setTimeout(() => window.dispatchEvent(
+              new KeyboardEvent("keydown", { key: "f", metaKey: true, bubbles: true, cancelable: true })
+            ), 50);
           }}
           onFindReplace={() => {
             setCommandPaletteOpen(false);
-            setTimeout(() => {
-              window.dispatchEvent(new KeyboardEvent("keydown", { key: "h", metaKey: true, bubbles: true }));
-            }, 50);
+            setTimeout(() => window.dispatchEvent(
+              new KeyboardEvent("keydown", { key: "h", metaKey: true, bubbles: true, cancelable: true })
+            ), 50);
           }}
         />
       )}
