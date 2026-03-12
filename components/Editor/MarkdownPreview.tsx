@@ -56,8 +56,8 @@ export default function MarkdownPreview({ content, settings }: MarkdownPreviewPr
         startOnLoad: false,
         theme: isDark ? "dark" : "default",
         securityLevel: "loose",
-        flowchart: { htmlLabels: true, wrappingWidth: 200 },
-        sequence: { wrap: true, width: 150 },
+        flowchart: { htmlLabels: true, wrappingWidth: 120 },
+        sequence: { wrap: true, width: 120 },
       });
 
       for (const block of el.querySelectorAll("code.language-mermaid")) {
@@ -67,9 +67,13 @@ export default function MarkdownPreview({ content, settings }: MarkdownPreviewPr
         try {
           const id = `mermaid-${Math.random().toString(36).slice(2)}`;
           const { svg } = await mermaidRef.current!.default.render(id, code);
+          // Remove fixed width/height so the SVG scales to its container
+          const responsive = svg
+            .replace(/\sheight="[^"]*"/, "")
+            .replace(/\swidth="[^"]+"/, ' width="100%"');
           const wrapper = document.createElement("div");
           wrapper.className = "mermaid";
-          wrapper.innerHTML = svg;
+          wrapper.innerHTML = responsive;
           pre.replaceWith(wrapper);
         } catch {
           // leave as code block if mermaid fails
