@@ -209,6 +209,8 @@ export default function AppShell() {
           onViewModeChange={setViewMode}
           onSave={handleSave}
           isDirty={activeTab?.isDirty ?? false}
+          settings={settings}
+          onUpdateSettings={updateSettings}
         />
 
         {/* Editor area */}
