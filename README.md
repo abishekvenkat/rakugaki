@@ -69,15 +69,17 @@ Tabs work the way tabs work. `Cmd+T` opens a new one. `Cmd+W` closes it. A blue 
 
 **Editing modes**
 
-There's a toggle in the top right for Edit, Split, and Preview modes.
+The button in the top right cycles through Edit, Split, and Preview. Click it once to move forward, keep clicking to go back around.
 
 - **Edit** — just the raw Markdown
 - **Preview** — rendered output, Mermaid diagrams included
 - **Split** — both at once, side by side, with a draggable divider
 
-**Recovery folder**
+**Session restore**
 
-On first launch, Rakugaki asks you to pick a folder where it will auto-save recovery copies of your notes every 30 seconds. This is optional but recommended. If your browser crashes mid-sentence (it happens), you can find your draft there.
+If you close the app mid-thought and reopen it, your unsaved notes come back automatically. No setup needed. Rakugaki quietly saves your session every few seconds in the background and restores it on next launch. Once you actually save a file with `Cmd+S`, the recovery copy is deleted.
+
+You can also designate a folder for longer-term recovery backups in Settings. Rakugaki will write `.md` files there every 30 seconds as a secondary fallback. Useful if you want the drafts to survive a browser reset or a new device.
 
 **Command palette**
 
@@ -92,6 +94,7 @@ On first launch, Rakugaki asks you to pick a folder where it will auto-save reco
 | `Cmd+T` | new tab |
 | `Cmd+W` | close tab |
 | `Cmd+K` | command palette |
+| `Cmd+,` | settings |
 | `Cmd+\` | toggle sidebar |
 | `Cmd+Shift+E` | toggle edit/preview |
 
@@ -101,7 +104,7 @@ On first launch, Rakugaki asks you to pick a folder where it will auto-save reco
 
 **Your notes are not synced anywhere.** This is the whole point. If you want them on another device, put them in a folder that iCloud or Dropbox already syncs. Rakugaki just reads and writes files — it doesn't care where those files live.
 
-**File handles reset on reload.** This is a browser security thing, not a bug. If you close and reopen the app, it won't automatically reconnect to files you had open before. Just open them again.
+**Your content comes back, but not the file path.** Rakugaki restores your unsaved text on reopen. What it can't restore is which file on disk that text belonged to — browser security doesn't allow storing file handles across sessions. So after a restore, the first `Cmd+S` will ask where to save. Pick the same file and you're back to normal.
 
 **Safari's PWA support is fine but not great.** The File System Access API works on Chrome and Edge. Safari has its own implementation that behaves slightly differently. If something feels off on Safari, try Chrome.
 

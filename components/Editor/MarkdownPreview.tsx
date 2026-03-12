@@ -70,7 +70,7 @@ export default function MarkdownPreview({ content, settings }: MarkdownPreviewPr
   return (
     <div
       ref={containerRef}
-      className="markdown-preview"
+      className="markdown-preview prose dark:prose-invert max-w-none"
       dangerouslySetInnerHTML={{ __html: html }}
       style={{
         fontFamily: "var(--font-family-editor)",

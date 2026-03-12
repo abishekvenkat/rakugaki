@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { search, searchKeymap } from "@codemirror/search";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
 import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
@@ -58,7 +59,8 @@ export default function CodeMirrorEditor({ content, onChange, settings }: CodeMi
         markdown({ base: markdownLanguage, codeLanguages: languages }),
         syntaxHighlighting(defaultHighlightStyle),
         buildTheme(isDark),
-        keymap.of([...defaultKeymap, ...historyKeymap]),
+        search({ top: true }),
+        keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
         EditorView.lineWrapping,
         EditorView.contentAttributes.of({ "data-gramm": "false" }), // disable Grammarly
         updateListener,

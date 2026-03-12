@@ -8,6 +8,7 @@ import SettingsPanel from "./SettingsPanel";
 import CodeMirrorEditor from "./Editor/CodeMirrorEditor";
 import MarkdownPreview from "./Editor/MarkdownPreview";
 import SplitView from "./Editor/SplitView";
+import StatusBar from "./StatusBar";
 import { openFile, saveFile, saveFileAs, pickTempDir, hasTempDir, autosave, exportAs, openTempDir, saveSession, loadSession, clearSession } from "@/lib/fs";
 import type { SessionTab } from "@/lib/fs";
 import { loadSettings, saveSettings, applySettings } from "@/lib/settings";
@@ -38,6 +39,7 @@ export default function AppShell() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState<Settings>(loadSettings);
+  const [zenMode, setZenMode] = useState(false);
   const [setupDone, setSetupDone] = useState(false);
   const [sessionRestored, setSessionRestored] = useState(false);
   const autosaveTimer = useRef<NodeJS.Timeout | null>(null);
@@ -190,10 +192,17 @@ export default function AppShell() {
         e.preventDefault();
         setViewMode((v) => v === "edit" ? "preview" : "edit");
       }
+      if (cmd && e.shiftKey && e.key === "Z") {
+        e.preventDefault();
+        setZenMode((v) => !v);
+      }
+      if (e.key === "Escape" && zenMode && !commandPaletteOpen && !settingsOpen) {
+        setZenMode(false);
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [activeTabId, handleSave, addTab, closeTab]);
+  }, [activeTabId, handleSave, addTab, closeTab, zenMode, commandPaletteOpen, settingsOpen]);
 
   // ─── Settings ──────────────────────────────────────────────────────────────
 
@@ -221,35 +230,37 @@ export default function AppShell() {
       style={{ background: "var(--macos-bg)" }}
     >
       {/* Sidebar — always rendered; in vertical mode it shows tabs prominently */}
-      <Sidebar
-        isOpen={sidebarOpen || isVertical}
-        onToggle={() => setSidebarOpen((v) => !v)}
-        tabs={tabs}
-        activeTabId={activeTabId}
-        onSelectTab={setActiveTabId}
-        onAddTab={() => addTab()}
-        onCloseTab={closeTab}
-        settings={settings}
-        onUpdateSettings={updateSettings}
-        onOpenFile={handleOpen}
-        onSaveFile={handleSave}
-        onExport={handleExport}
-        onOpenRecovery={openTempDir}
-        onPickTempDir={pickTempDir}
-        hasTempDir={hasTempDir()}
-        isVerticalTabs={isVertical}
-      />
+      {!zenMode && (
+        <Sidebar
+          isOpen={sidebarOpen || isVertical}
+          onToggle={() => setSidebarOpen((v) => !v)}
+          tabs={tabs}
+          activeTabId={activeTabId}
+          onSelectTab={setActiveTabId}
+          onAddTab={() => addTab()}
+          onCloseTab={closeTab}
+          settings={settings}
+          onUpdateSettings={updateSettings}
+          onOpenFile={handleOpen}
+          onSaveFile={handleSave}
+          onExport={handleExport}
+          onOpenRecovery={openTempDir}
+          onPickTempDir={pickTempDir}
+          hasTempDir={hasTempDir()}
+          isVerticalTabs={isVertical}
+        />
+      )}
 
       {/* Main content area — shift right when sidebar is pinned open */}
       <div
         className="flex flex-1 flex-col overflow-hidden transition-all"
         style={{
           paddingTop: "28px",
-          marginLeft: isVertical ? "240px" : "0",
+          marginLeft: zenMode ? "0" : (isVertical ? "240px" : "0"),
         }}
       >
-        {/* Tab bar — hidden in vertical mode */}
-        {!isVertical && (
+        {/* Tab bar — hidden in vertical mode and zen mode */}
+        {!zenMode && !isVertical && (
           <TabBar
             tabs={tabs}
             activeTabId={activeTabId}
@@ -261,11 +272,12 @@ export default function AppShell() {
             onSave={handleSave}
             isDirty={activeTab?.isDirty ?? false}
             onSettingsClick={() => setSettingsOpen(true)}
+            onZenMode={() => setZenMode(true)}
           />
         )}
 
         {/* Vertical mode top bar */}
-        {isVertical && (
+        {!zenMode && isVertical && (
           <div
             className="flex items-center justify-between border-b px-4"
             style={{
@@ -332,7 +344,27 @@ export default function AppShell() {
             </>
           )}
         </div>
+
+        {/* Status bar */}
+        {!zenMode && <StatusBar content={activeTab?.content ?? ""} />}
       </div>
+
+      {/* Zen mode exit button */}
+      {zenMode && (
+        <button
+          onClick={() => setZenMode(false)}
+          className="fixed bottom-6 right-6 rounded-full px-4 py-1.5 text-xs font-medium"
+          style={{
+            background: "var(--macos-surface)",
+            border: "1px solid var(--macos-border)",
+            color: "var(--macos-text-secondary)",
+            backdropFilter: "blur(20px)",
+            zIndex: 50,
+          }}
+        >
+          Esc to exit
+        </button>
+      )}
 
       {/* Command Palette */}
       {commandPaletteOpen && (

@@ -14,6 +14,7 @@ interface TabBarProps {
   onSave: () => void;
   isDirty: boolean;
   onSettingsClick: () => void;
+  onZenMode: () => void;
 }
 
 const VIEW_CYCLE: ViewMode[] = ["edit", "split", "preview"];
@@ -22,7 +23,7 @@ const VIEW_ICONS: Record<ViewMode, string> = { edit: "✏️", split: "⇔", pre
 
 export default function TabBar({
   tabs, activeTabId, onSelectTab, onCloseTab, onAddTab,
-  viewMode, onViewModeChange, onSave, isDirty, onSettingsClick,
+  viewMode, onViewModeChange, onSave, isDirty, onSettingsClick, onZenMode,
 }: TabBarProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -124,6 +125,21 @@ export default function TabBar({
         >
           <span>{VIEW_ICONS[viewMode]}</span>
           <span>{VIEW_LABELS[viewMode]}</span>
+        </button>
+
+        {/* Zen mode button */}
+        <button
+          onClick={onZenMode}
+          className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+          style={{
+            background: "var(--macos-border)",
+            color: "var(--macos-text-secondary)",
+          }}
+          title="Zen mode (⌘⇧Z)"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M1 4V2h2M11 2h2v2M1 10v2h2M11 12h2v-2" />
+          </svg>
         </button>
 
         {/* Settings button */}
