@@ -176,6 +176,17 @@ export default function AppShell() {
     }
   }, [activeTab]);
 
+  // ─── Right-click → command palette ────────────────────────────────────────
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      e.preventDefault();
+      setCommandPaletteOpen(true);
+    };
+    window.addEventListener("contextmenu", handler);
+    return () => window.removeEventListener("contextmenu", handler);
+  }, []);
+
   // ─── Keyboard shortcuts ────────────────────────────────────────────────────
 
   useEffect(() => {
