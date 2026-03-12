@@ -8,7 +8,8 @@ import SettingsPanel from "./SettingsPanel";
 import CodeMirrorEditor from "./Editor/CodeMirrorEditor";
 import MarkdownPreview from "./Editor/MarkdownPreview";
 import SplitView from "./Editor/SplitView";
-import { openFile, saveFile, saveFileAs, pickTempDir, hasTempDir, autosave, exportAs, openTempDir } from "@/lib/fs";
+import { openFile, saveFile, saveFileAs, pickTempDir, hasTempDir, autosave, exportAs, openTempDir, saveSession, loadSession, clearSession } from "@/lib/fs";
+import type { SessionTab } from "@/lib/fs";
 import { loadSettings, saveSettings, applySettings } from "@/lib/settings";
 import type { Settings } from "@/lib/settings";
 import type { FileHandle } from "@/lib/fs";
@@ -38,16 +39,36 @@ export default function AppShell() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const [setupDone, setSetupDone] = useState(false);
+  const [sessionRestored, setSessionRestored] = useState(false);
   const autosaveTimer = useRef<NodeJS.Timeout | null>(null);
+  const sessionSaveTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // Set initial active tab
+  // On first mount: check OPFS for a saved session and restore it
   useEffect(() => {
-    setActiveTabId(tabs[0].id);
+    const restore = async () => {
+      const session = await loadSession();
+      if (session && session.tabs.length > 0 && session.tabs.some(t => t.content.trim())) {
+        const restoredTabs: Tab[] = session.tabs.map((t) => ({
+          id: t.id,
+          title: t.title,
+          content: t.content,
+          fileHandle: null, // handles can't be persisted
+          isDirty: t.isDirty,
+        }));
+        setTabs(restoredTabs);
+        setActiveTabId(session.activeTabId || restoredTabs[0].id);
+      } else {
+        setActiveTabId(tabs[0].id);
+      }
+      setSessionRestored(true);
+    };
+    restore();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // First-launch setup: ask for temp/recovery folder
   useEffect(() => {
+    if (!sessionRestored) return;
     if (!setupDone) {
       const alreadyAsked = localStorage.getItem("rakugaki:setup-done");
       if (!alreadyAsked) {
@@ -62,11 +83,29 @@ export default function AppShell() {
       }
       setSetupDone(true);
     }
-  }, [setupDone]);
+  }, [sessionRestored, setupDone]);
 
   const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0];
 
-  // Autosave every 30s when content changes
+  // Save session to OPFS whenever tabs change (debounced 5s)
+  useEffect(() => {
+    if (!sessionRestored) return;
+    if (sessionSaveTimer.current) clearTimeout(sessionSaveTimer.current);
+    sessionSaveTimer.current = setTimeout(() => {
+      const sessionTabs: SessionTab[] = tabs.map((t) => ({
+        id: t.id,
+        title: t.title,
+        content: t.content,
+        isDirty: t.isDirty,
+      }));
+      saveSession(sessionTabs, activeTabId);
+    }, 5_000);
+    return () => {
+      if (sessionSaveTimer.current) clearTimeout(sessionSaveTimer.current);
+    };
+  }, [tabs, activeTabId, sessionRestored]);
+
+  // Autosave to user's temp folder every 30s when content changes
   useEffect(() => {
     if (!activeTab) return;
     if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
@@ -114,19 +153,24 @@ export default function AppShell() {
     if (!activeTab) return;
     if (activeTab.fileHandle) {
       await saveFile(activeTab.fileHandle.handle, activeTab.content);
-      setTabs((prev) =>
-        prev.map((t) => (t.id === activeTab.id ? { ...t, isDirty: false } : t))
-      );
+      setTabs((prev) => {
+        const next = prev.map((t) => (t.id === activeTab.id ? { ...t, isDirty: false } : t));
+        // Clear session if all tabs are now clean
+        if (next.every((t) => !t.isDirty)) clearSession();
+        return next;
+      });
     } else {
       const handle = await saveFileAs(activeTab.content, activeTab.title + ".md");
       if (!handle) return;
-      setTabs((prev) =>
-        prev.map((t) =>
+      setTabs((prev) => {
+        const next = prev.map((t) =>
           t.id === activeTab.id
             ? { ...t, fileHandle: handle, title: handle.name, isDirty: false }
             : t
-        )
-      );
+        );
+        if (next.every((t) => !t.isDirty)) clearSession();
+        return next;
+      });
     }
   }, [activeTab]);
 

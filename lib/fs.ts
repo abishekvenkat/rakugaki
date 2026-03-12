@@ -120,6 +120,61 @@ export async function openTempDir(): Promise<void> {
   }
 }
 
+// ─── OPFS Session Persistence ─────────────────────────────────────────────────
+// Uses the Origin Private File System for zero-permission session recovery.
+// Only tab titles and content are stored — never file handles (not serializable).
+
+export interface SessionTab {
+  id: string;
+  title: string;
+  content: string;
+  isDirty: boolean;
+}
+
+export interface SessionData {
+  tabs: SessionTab[];
+  activeTabId: string;
+  savedAt: number;
+}
+
+async function getOpfsRoot(): Promise<FileSystemDirectoryHandle> {
+  return navigator.storage.getDirectory();
+}
+
+export async function saveSession(tabs: SessionTab[], activeTabId: string): Promise<void> {
+  try {
+    const root = await getOpfsRoot();
+    const fileHandle = await root.getFileHandle("session.json", { create: true });
+    const writable = await fileHandle.createWritable();
+    const data: SessionData = { tabs, activeTabId, savedAt: Date.now() };
+    await writable.write(JSON.stringify(data));
+    await writable.close();
+  } catch {
+    // OPFS not available or write failed — silently skip
+  }
+}
+
+export async function loadSession(): Promise<SessionData | null> {
+  try {
+    const root = await getOpfsRoot();
+    const fileHandle = await root.getFileHandle("session.json");
+    const file = await fileHandle.getFile();
+    const text = await file.text();
+    return JSON.parse(text) as SessionData;
+  } catch {
+    return null;
+  }
+}
+
+export async function clearSession(): Promise<void> {
+  try {
+    const root = await getOpfsRoot();
+    await root.removeEntry("session.json");
+  } catch {
+    // File may not exist
+  }
+}
+
 // ─── Export ───────────────────────────────────────────────────────────────────
 
 type ExportFormat = "md" | "txt" | "rtf";
