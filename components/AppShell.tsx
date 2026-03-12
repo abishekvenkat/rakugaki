@@ -248,6 +248,7 @@ export default function AppShell() {
           onPickTempDir={pickTempDir}
           hasTempDir={hasTempDir()}
           isVerticalTabs={isVertical}
+          onSettingsClick={() => setSettingsOpen(true)}
         />
       )}
 
@@ -271,7 +272,6 @@ export default function AppShell() {
             onViewModeChange={setViewMode}
             onSave={handleSave}
             isDirty={activeTab?.isDirty ?? false}
-            onSettingsClick={() => setSettingsOpen(true)}
             onZenMode={() => setZenMode(true)}
           />
         )}
@@ -310,19 +310,17 @@ export default function AppShell() {
                   const idx = modes.indexOf(viewMode);
                   setViewMode(modes[(idx + 1) % modes.length]);
                 }}
-                className="flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium"
-                style={{ background: "var(--macos-border)", color: "var(--macos-text)" }}
-              >
-                {viewMode === "edit" ? "✏️ Edit" : viewMode === "split" ? "⇔ Split" : "👁 Preview"}
-              </button>
-              <button
-                onClick={() => setSettingsOpen(true)}
                 className="flex h-7 w-7 items-center justify-center rounded-lg"
-                style={{ background: "var(--macos-border)", color: "var(--macos-text-secondary)" }}
+                style={{ background: "var(--macos-border)", color: "var(--macos-text)" }}
+                title={`View: ${viewMode} (click to cycle)`}
               >
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" clipRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" />
-                </svg>
+                {viewMode === "edit" ? (
+                  <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+                ) : viewMode === "split" ? (
+                  <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M2 4a1 1 0 011-1h5a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zm9 0a1 1 0 011-1h5a1 1 0 011 1v12a1 1 0 01-1 1h-5a1 1 0 01-1-1V4z" /></svg>
+                ) : (
+                  <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" /></svg>
+                )}
               </button>
             </div>
           </div>
@@ -384,12 +382,6 @@ export default function AppShell() {
             setCommandPaletteOpen(false);
             setTimeout(() => window.dispatchEvent(
               new KeyboardEvent("keydown", { key: "f", metaKey: true, bubbles: true, cancelable: true })
-            ), 50);
-          }}
-          onFindReplace={() => {
-            setCommandPaletteOpen(false);
-            setTimeout(() => window.dispatchEvent(
-              new KeyboardEvent("keydown", { key: "h", metaKey: true, bubbles: true, cancelable: true })
             ), 50);
           }}
         />

@@ -98,8 +98,7 @@ You can also designate a folder for longer-term recovery backups in Settings. Ra
 | `Cmd+\` | toggle sidebar |
 | `Cmd+Shift+E` | toggle edit/preview |
 | `Cmd+Shift+Z` | zen mode |
-| `Cmd+F` | find |
-| `Cmd+H` | find and replace |
+| `Cmd+F` | find and replace |
 
 that should be enough features for a text editor.
 

@@ -82,7 +82,7 @@ export default function CodeMirrorEditor({ content, onChange, settings }: CodeMi
     const handler = (e: KeyboardEvent) => {
       const cmd = e.metaKey || e.ctrlKey;
       if (!cmd || e.shiftKey || e.altKey) return;
-      if (e.key === "f" || e.key === "h") {
+      if (e.key === "f") {
         e.preventDefault();
         if (viewRef.current) openSearchPanel(viewRef.current);
       }

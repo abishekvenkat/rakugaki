@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkHtml from "remark-html";
+import hljs from "highlight.js";
+import "highlight.js/styles/github.css";
 import type { Settings } from "@/lib/settings";
 
 interface MarkdownPreviewProps {
@@ -15,6 +17,10 @@ export default function MarkdownPreview({ content, settings }: MarkdownPreviewPr
   const [html, setHtml] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const mermaidRef = useRef<typeof import("mermaid") | null>(null);
+
+  const isDark = settings.theme === "dark" ||
+    (settings.theme === "system" && typeof window !== "undefined" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   // Parse markdown to HTML
   useEffect(() => {
@@ -28,23 +34,29 @@ export default function MarkdownPreview({ content, settings }: MarkdownPreviewPr
     render();
   }, [content]);
 
-  // Render Mermaid diagrams after HTML update
+  // Syntax highlight code blocks + render Mermaid diagrams after HTML update
   useEffect(() => {
     if (!containerRef.current || !html) return;
 
+    // Syntax highlight non-mermaid code blocks
+    const codeBlocks = containerRef.current.querySelectorAll("pre code:not(.language-mermaid)");
+    codeBlocks.forEach((block) => {
+      hljs.highlightElement(block as HTMLElement);
+    });
+
     const renderMermaid = async () => {
-      // Lazy-load mermaid
       if (!mermaidRef.current) {
         const mermaid = await import("mermaid");
         mermaidRef.current = mermaid;
-        mermaid.default.initialize({
-          startOnLoad: false,
-          theme: document.documentElement.classList.contains("dark") ? "dark" : "default",
-          securityLevel: "loose",
-        });
       }
+      mermaidRef.current!.default.initialize({
+        startOnLoad: false,
+        theme: isDark ? "dark" : "default",
+        securityLevel: "loose",
+        flowchart: { htmlLabels: true, wrappingWidth: 200 },
+        sequence: { wrap: true, width: 150 },
+      });
 
-      // Find all code blocks tagged as mermaid and replace with diagrams
       const blocks = containerRef.current!.querySelectorAll("code.language-mermaid");
       for (const block of blocks) {
         const code = block.textContent ?? "";
@@ -65,7 +77,7 @@ export default function MarkdownPreview({ content, settings }: MarkdownPreviewPr
     };
 
     renderMermaid();
-  }, [html]);
+  }, [html, isDark]);
 
   return (
     <div
