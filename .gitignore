@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# PWA (auto-generated)
+public/sw.js
+public/workbox-*.js
+public/worker-*.js
+public/fallback-*.js
+
+# Env
+.env
+.env.local
+.env*.local
+
+# OS
+.DS_Store
+
+# Build
+*.tsbuildinfo

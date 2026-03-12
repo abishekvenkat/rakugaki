@@ -1,0 +1,30 @@
+{
+  "name": "Rakugaki",
+  "short_name": "Rakugaki",
+  "description": "A local-first markdown note-taking app",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/rakugaki-light.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/rakugaki-light.png",
+      "sizes": "511x511",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/rakugaki-dark.png",
+      "sizes": "511x511",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
