@@ -61,13 +61,16 @@ export default function MarkdownPreview({ content, settings }: MarkdownPreviewPr
       });
 
       for (const block of el.querySelectorAll("code.language-mermaid")) {
-        const code = block.textContent ?? "";
+        const rawCode = block.textContent ?? "";
         const pre = block.parentElement;
         if (!pre) continue;
         try {
+          // Embed wrapping config directly so Mermaid accounts for it during layout
+          const initHeader = `%%{init: {"flowchart": {"htmlLabels": true, "wrappingWidth": 100}, "sequence": {"wrap": true, "width": 100}}}%%\n`;
+          const code = rawCode.trimStart().startsWith("%%") ? rawCode : initHeader + rawCode;
           const id = `mermaid-${Math.random().toString(36).slice(2)}`;
           const { svg } = await mermaidRef.current!.default.render(id, code);
-          // Remove fixed width/height so the SVG scales to its container
+          // Remove fixed dimensions so SVG scales to its container width
           const responsive = svg
             .replace(/\sheight="[^"]*"/, "")
             .replace(/\swidth="[^"]+"/, ' width="100%"');

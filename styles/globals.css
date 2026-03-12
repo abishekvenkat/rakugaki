@@ -241,15 +241,9 @@ code.hljs { padding: 3px 5px; }
 .dark .hljs-addition { color: #aff5b4; background-color: #033a16; }
 .dark .hljs-deletion { color: #ffdcd7; background-color: #67060c; }
 
-/* Mermaid — responsive and text wrapping */
-.mermaid svg { overflow: visible; max-width: 100%; }
-.mermaid svg foreignObject { overflow: visible; }
-.mermaid svg .label { overflow: visible; }
-.mermaid svg .nodeLabel, .mermaid svg .edgeLabel {
-  white-space: normal !important;
-  word-break: break-word !important;
-  text-align: center;
-}
+/* Mermaid — responsive */
+.mermaid { overflow-x: auto; }
+.mermaid svg { max-width: 100%; display: block; }
 
 /* Mermaid diagram container */
 .mermaid {
