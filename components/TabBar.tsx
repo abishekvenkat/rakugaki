@@ -117,15 +117,17 @@ export default function TabBar({
         className="flex items-center gap-2 pl-2"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
-        {/* Save pill */}
+        {/* Save button */}
         {isDirty && (
           <button
             onClick={onSave}
-            className="rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors"
-            style={{ background: "var(--macos-accent)", color: "#fff", fontSize: "11px" }}
+            className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+            style={{ background: "var(--macos-accent)", color: "#fff" }}
             title="Save (⌘S)"
           >
-            Save
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6.414L13.586 2H4zm7 1.5V7H6V3.5h5zM5 11a1 1 0 011-1h8a1 1 0 011 1v5H5v-5z" />
+            </svg>
           </button>
         )}
 
