@@ -199,7 +199,10 @@ export default function AppShell() {
       if (cmd && e.key === "k") { e.preventDefault(); setCommandPaletteOpen(true); }
       if (cmd && e.key === "\\") { e.preventDefault(); setSidebarOpen((v) => !v); }
       if (cmd && e.key === ",") { e.preventDefault(); setSettingsOpen(true); }
-      if (cmd && e.shiftKey && e.key === "E") {
+      // Block browser Cmd+Shift+E (sidebar search in some browsers)
+      if (cmd && e.shiftKey && e.key === "E") { e.preventDefault(); }
+      // Ctrl+Shift+E cycles view modes
+      if (e.ctrlKey && e.shiftKey && e.key === "E") {
         e.preventDefault();
         setViewMode((v) => {
           const idx = availableModes.indexOf(v);
