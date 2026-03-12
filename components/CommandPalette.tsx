@@ -10,6 +10,7 @@ interface CommandPaletteProps {
   onSave: () => void;
   onToggleTheme: () => void;
   onSetViewMode: (mode: ViewMode) => void;
+  availableModes: ViewMode[];
   onExport: (fmt: "md" | "txt" | "rtf") => void;
   onZenMode: () => void;
   onFind: () => void;
@@ -23,7 +24,7 @@ interface Command {
 }
 
 export default function CommandPalette({
-  onClose, onNewNote, onOpenFile, onSave, onToggleTheme, onSetViewMode, onExport, onZenMode, onFind,
+  onClose, onNewNote, onOpenFile, onSave, onToggleTheme, onSetViewMode, availableModes, onExport, onZenMode, onFind,
 }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -35,8 +36,8 @@ export default function CommandPalette({
     { id: "save", label: "Save", shortcut: "⌘S", action: onSave },
     { id: "theme", label: "Toggle Dark/Light Theme", action: onToggleTheme },
     { id: "edit", label: "Switch to Edit Mode", action: () => onSetViewMode("edit") },
-    { id: "preview", label: "Switch to Preview Mode", action: () => onSetViewMode("preview") },
-    { id: "split", label: "Switch to Split View", action: () => onSetViewMode("split") },
+    ...(availableModes.includes("preview") ? [{ id: "preview", label: "Switch to Preview Mode", action: () => onSetViewMode("preview") }] : []),
+    ...(availableModes.includes("split") ? [{ id: "split", label: "Switch to Split View", action: () => onSetViewMode("split") }] : []),
     { id: "zen", label: "Zen Mode", shortcut: "⌘⇧Z", action: onZenMode },
     { id: "find", label: "Find", shortcut: "⌘F", action: onFind },
     { id: "export-md", label: "Export as Markdown (.md)", action: () => onExport("md") },

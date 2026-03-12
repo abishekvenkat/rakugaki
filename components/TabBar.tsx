@@ -10,13 +10,12 @@ interface TabBarProps {
   onCloseTab: (id: string) => void;
   onAddTab: () => void;
   viewMode: ViewMode;
+  availableModes: ViewMode[];
   onViewModeChange: (mode: ViewMode) => void;
   onSave: () => void;
   isDirty: boolean;
   onZenMode: () => void;
 }
-
-const VIEW_CYCLE: ViewMode[] = ["edit", "split", "preview"];
 
 const VIEW_SVG: Record<ViewMode, React.ReactNode> = {
   edit: (
@@ -39,14 +38,14 @@ const VIEW_SVG: Record<ViewMode, React.ReactNode> = {
 
 export default function TabBar({
   tabs, activeTabId, onSelectTab, onCloseTab, onAddTab,
-  viewMode, onViewModeChange, onSave, isDirty, onZenMode,
+  viewMode, availableModes, onViewModeChange, onSave, isDirty, onZenMode,
 }: TabBarProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   function cycleViewMode() {
-    const idx = VIEW_CYCLE.indexOf(viewMode);
-    onViewModeChange(VIEW_CYCLE[(idx + 1) % VIEW_CYCLE.length]);
+    const idx = availableModes.indexOf(viewMode);
+    onViewModeChange(availableModes[(idx + 1) % availableModes.length]);
   }
 
   return (

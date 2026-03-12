@@ -1,6 +1,6 @@
 "use client";
 
-import type { Settings, TabLayout, Theme, Font, FontSize } from "@/lib/settings";
+import type { Settings, TabLayout, Theme, Font, FontSize, EnabledViews } from "@/lib/settings";
 import { pickTempDir, hasTempDir } from "@/lib/fs";
 
 interface SettingsPanelProps {
@@ -105,6 +105,18 @@ export default function SettingsPanel({ settings, onUpdate, onClose }: SettingsP
                 ]}
                 value={settings.tabLayout}
                 onChange={(v) => onUpdate({ tabLayout: v as TabLayout })}
+              />
+            </Row>
+
+            <Row label="Views">
+              <SegmentedControl
+                options={[
+                  { value: "preview", label: "Preview" },
+                  { value: "split", label: "Split" },
+                  { value: "both", label: "Both" },
+                ]}
+                value={settings.enabledViews}
+                onChange={(v) => onUpdate({ enabledViews: v as EnabledViews })}
               />
             </Row>
           </div>

@@ -2,12 +2,14 @@ export type Theme = "light" | "dark" | "system";
 export type Font = "sans" | "mono" | "serif";
 export type FontSize = "xs" | "s" | "m" | "l" | "xl";
 export type TabLayout = "horizontal" | "vertical";
+export type EnabledViews = "preview" | "split" | "both";
 
 export interface Settings {
   theme: Theme;
   font: Font;
   fontSize: FontSize;
   tabLayout: TabLayout;
+  enabledViews: EnabledViews;
 }
 
 const DEFAULTS: Settings = {
@@ -15,6 +17,7 @@ const DEFAULTS: Settings = {
   font: "sans",
   fontSize: "m",
   tabLayout: "horizontal",
+  enabledViews: "both",
 };
 
 export function loadSettings(): Settings {

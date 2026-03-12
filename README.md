@@ -96,7 +96,7 @@ You can also designate a folder for longer-term recovery backups in Settings. Ra
 | `Cmd+K` | command palette |
 | `Cmd+,` | settings |
 | `Cmd+\` | toggle sidebar |
-| `Cmd+Shift+E` | toggle edit/preview |
+| `Cmd+Shift+E` | cycle view modes |
 | `Cmd+Shift+Z` | zen mode |
 | `Cmd+F` | find and replace |
 

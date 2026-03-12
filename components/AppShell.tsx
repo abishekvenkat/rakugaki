@@ -201,7 +201,10 @@ export default function AppShell() {
       if (cmd && e.key === ",") { e.preventDefault(); setSettingsOpen(true); }
       if (cmd && e.shiftKey && e.key === "E") {
         e.preventDefault();
-        setViewMode((v) => v === "edit" ? "preview" : "edit");
+        setViewMode((v) => {
+          const idx = availableModes.indexOf(v);
+          return availableModes[(idx + 1) % availableModes.length];
+        });
       }
       if (cmd && e.shiftKey && e.key === "Z") {
         e.preventDefault();
@@ -232,6 +235,17 @@ export default function AppShell() {
   }, [activeTab]);
 
   const isVertical = settings.tabLayout === "vertical";
+
+  // Compute which view modes are available based on settings
+  const availableModes: ViewMode[] = ["edit"];
+  if (settings.enabledViews === "split" || settings.enabledViews === "both") availableModes.push("split");
+  if (settings.enabledViews === "preview" || settings.enabledViews === "both") availableModes.push("preview");
+
+  // Reset to edit if current viewMode was disabled
+  useEffect(() => {
+    if (!availableModes.includes(viewMode)) setViewMode("edit");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.enabledViews]);
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
@@ -280,6 +294,7 @@ export default function AppShell() {
             onCloseTab={closeTab}
             onAddTab={() => addTab()}
             viewMode={viewMode}
+            availableModes={availableModes}
             onViewModeChange={setViewMode}
             onSave={handleSave}
             isDirty={activeTab?.isDirty ?? false}
@@ -317,9 +332,8 @@ export default function AppShell() {
               )}
               <button
                 onClick={() => {
-                  const modes: ViewMode[] = ["edit", "split", "preview"];
-                  const idx = modes.indexOf(viewMode);
-                  setViewMode(modes[(idx + 1) % modes.length]);
+                  const idx = availableModes.indexOf(viewMode);
+                  setViewMode(availableModes[(idx + 1) % availableModes.length]);
                 }}
                 className="flex h-7 w-7 items-center justify-center rounded-lg"
                 style={{ background: "var(--macos-border)", color: "var(--macos-text)" }}
@@ -387,6 +401,7 @@ export default function AppShell() {
             setCommandPaletteOpen(false);
           }}
           onSetViewMode={(mode) => { setViewMode(mode); setCommandPaletteOpen(false); }}
+          availableModes={availableModes}
           onExport={(fmt) => { handleExport(fmt); setCommandPaletteOpen(false); }}
           onZenMode={() => { setZenMode(true); setCommandPaletteOpen(false); }}
           onFind={() => {
