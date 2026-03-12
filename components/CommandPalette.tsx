@@ -11,6 +11,9 @@ interface CommandPaletteProps {
   onToggleTheme: () => void;
   onSetViewMode: (mode: ViewMode) => void;
   onExport: (fmt: "md" | "txt" | "rtf") => void;
+  onZenMode: () => void;
+  onFind: () => void;
+  onFindReplace: () => void;
 }
 
 interface Command {
@@ -21,7 +24,7 @@ interface Command {
 }
 
 export default function CommandPalette({
-  onClose, onNewNote, onOpenFile, onSave, onToggleTheme, onSetViewMode, onExport,
+  onClose, onNewNote, onOpenFile, onSave, onToggleTheme, onSetViewMode, onExport, onZenMode, onFind, onFindReplace,
 }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -35,6 +38,9 @@ export default function CommandPalette({
     { id: "edit", label: "Switch to Edit Mode", action: () => onSetViewMode("edit") },
     { id: "preview", label: "Switch to Preview Mode", action: () => onSetViewMode("preview") },
     { id: "split", label: "Switch to Split View", action: () => onSetViewMode("split") },
+    { id: "zen", label: "Zen Mode", shortcut: "⌘⇧Z", action: onZenMode },
+    { id: "find", label: "Find", shortcut: "⌘F", action: onFind },
+    { id: "find-replace", label: "Find and Replace", shortcut: "⌘H", action: onFindReplace },
     { id: "export-md", label: "Export as Markdown (.md)", action: () => onExport("md") },
     { id: "export-txt", label: "Export as Plain Text (.txt)", action: () => onExport("txt") },
     { id: "export-rtf", label: "Export as Rich Text (.rtf)", action: () => onExport("rtf") },

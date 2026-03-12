@@ -379,6 +379,19 @@ export default function AppShell() {
           }}
           onSetViewMode={(mode) => { setViewMode(mode); setCommandPaletteOpen(false); }}
           onExport={(fmt) => { handleExport(fmt); setCommandPaletteOpen(false); }}
+          onZenMode={() => { setZenMode(true); setCommandPaletteOpen(false); }}
+          onFind={() => {
+            setCommandPaletteOpen(false);
+            setTimeout(() => {
+              window.dispatchEvent(new KeyboardEvent("keydown", { key: "f", metaKey: true, bubbles: true }));
+            }, 50);
+          }}
+          onFindReplace={() => {
+            setCommandPaletteOpen(false);
+            setTimeout(() => {
+              window.dispatchEvent(new KeyboardEvent("keydown", { key: "h", metaKey: true, bubbles: true }));
+            }, 50);
+          }}
         />
       )}
 
