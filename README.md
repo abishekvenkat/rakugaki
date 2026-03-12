@@ -69,11 +69,25 @@ Tabs work the way tabs work. `Cmd+T` opens a new one. `Cmd+W` closes it. A blue 
 
 **Editing modes**
 
-The button in the top right cycles through Edit, Split, and Preview. Click it once to move forward, keep clicking to go back around.
+The icon button in the top bar cycles through Edit, Split, and Preview. `Ctrl+Shift+E` does the same from the keyboard. Keep pressing to go back around.
 
-- **Edit** — just the raw Markdown
-- **Preview** — rendered output, Mermaid diagrams included
-- **Split** — both at once, side by side, with a draggable divider
+- Edit — just the raw Markdown
+- Preview — rendered output, Mermaid diagrams included
+- Split — both at once, side by side, with a draggable divider
+
+If you only use one or two of these, go to Settings and set Views to Preview only or Split only. The button and shortcut will cycle through whatever you've enabled.
+
+**Zen mode**
+
+`Cmd+Shift+Z` hides the sidebar, tabs, and status bar. Just you and the text. Press `Escape` or click the button in the bottom-right corner to come back.
+
+**Find and replace**
+
+`Cmd+F` opens a panel at the top of the editor. It does both find and replace. `Escape` closes it.
+
+**Word count**
+
+The bar at the very bottom shows word count, character count, and a rough reading time estimate. It updates as you type and disappears in zen mode.
 
 **Session restore**
 
@@ -83,7 +97,7 @@ You can also designate a folder for longer-term recovery backups in Settings. Ra
 
 **Command palette**
 
-`Cmd+K` opens it. Search for any action without hunting through the sidebar.
+`Cmd+K` opens it. Right-click anywhere in the app does too. Search for any action without hunting through the sidebar.
 
 **Keyboard shortcuts**
 
